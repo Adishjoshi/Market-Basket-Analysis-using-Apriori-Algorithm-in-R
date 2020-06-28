@@ -1,0 +1,68 @@
+---
+title: "Customer Shopping Prediction using Market Basket Analysis"
+author: "Adish Joshi"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r}
+install.packages("arules")
+library(arules)
+install.packages("arulesViz")
+library(arulesViz)
+
+data("Groceries")
+Groceries
+inspect(Groceries[1:3]) #here we inspect first 3 purcase combinations of the customer.
+Q = itemFrequency(Groceries) #Occurence of all the items like milk, soya seeds etc. 
+W= itemFrequency(Groceries[,1]) #occurence of the first item frankfurtur = 0.059 when we multiply it by tota no of rows i.e 9835. 
+
+
+0.059*9835 # we get 580 which means this item(frankfurture) has occured 580 times among 9835.
+#But as we are interested in the whole milk let'c how many times the milk has been purchased.
+0.2555160142 * 9835
+# we can see that milk has been purchased 2513 times.
+itemFrequency(Groceries[,1:6])# provides frequency of first 5 items
+ 
+install.packages('gmodels')
+library('gmodels')
+
+plot(itemFrequency(Groceries), support = 0.10)
+
+#Two terms support & confidence are important for the rule mining, where Support = no of item some item occured in total transactions & confidence is 
+
+m1= apriori(Groceries) #we can see that confidence = 0.8 & minval = 0.1
+summary(m1)
+
+m1= apriori(Groceries,parameter = list(support = 0.007, confidence = 0.25))
+summary(m1)
+
+#{rule length distribution (lhs + rhs):sizes what this means is for a product A and product B i.e 2 products there are 137 cases where the customer buys product B and A togeather, for 3 products A,B & C there are 214 cases where customer buys all of the 3 togeather & so on. 
+#  1   2   3   4 
+#  1 137 214  12 }
+
+inspect(m1[1:6]) # we can see that lift is the factor that a customer lifts the item & puts in his basket. 
+
+#LHS the items bought first by the customer & then customer buys the items on rhs, so we can find either the items customer bought b4 buying milk or after buying milk. 
+
+m1= apriori(data = Groceries,parameter = list(support = 0.001, confidence = 0.08), appearance = list(default ="lhs", rhs = "whole milk"), control = list(verbose = F))
+
+m1<- sort(m1,by="confidence")
+z= m1
+#inspect(m1)
+
+plot(m1[1:10],method="graph")
+
+install.packages("Benchmarking")
+library(Benchmarking)
+
+#Efficiency not working if works resend the code to me :)
+#efficiency(m1, plot = TRUE, type = "cpD2", thresh = NULL, 
+    #       shift = 0, amount = NULL)
+
+
+```
+
